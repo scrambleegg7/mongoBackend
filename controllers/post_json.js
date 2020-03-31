@@ -27,7 +27,7 @@ exports.createPost = (req, res) => {
     mypost.save().then( result => {
 
         res.status(200).json(
-            {post: result}
+            {posts: result}
         );
     });
 
