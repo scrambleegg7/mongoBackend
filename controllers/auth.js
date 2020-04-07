@@ -40,6 +40,9 @@ exports.signin = (req, res) => {
         res.cookie('t', token, { expire: new Date() + 9999 });
         // retrun response with user and token to frontend client
         const { _id, name, email, role } = user;
+        
+        console.log("controller auth returned data:", user )
+        
         return res.json({ token, user: { _id, email, name, role } });
     });
 };
@@ -50,6 +53,8 @@ exports.signout = (req, res) => {
 };
 
 exports.requireSignin = expressJwt({
+
+    // if token is validated, expressjwt appends into verfied user 
     secret: process.env.JWT_SECRET,
     userProperty: 'auth'
 });

@@ -50,61 +50,62 @@ exports.allUsers = (req, res) => {
 exports.getUser = (req, res) => {
     req.profile.hashed_password = undefined;
     req.profile.salt = undefined;
+    console.log(req.profile)
     return res.json(req.profile);
 };
 
-// exports.updateUser = (req, res, next) => {
-//     let user = req.profile;
-//     user = _.extend(user, req.body); // extend - mutate the source object
-//     user.updated = Date.now();
-//     user.save(err => {
-//         if (err) {
-//             return res.status(400).json({
-//                 error: "You are not authorized to perform this action"
-//             });
-//         }
-//         user.hashed_password = undefined;
-//         user.salt = undefined;
-//         res.json({ user });
-//     });
-// };
-
 exports.updateUser = (req, res, next) => {
-    let form = new formidable.IncomingForm();
-    // console.log("incoming form data: ", form);
-    form.keepExtensions = true;
-    form.parse(req, (err, fields, files) => {
-        if (err) {
-            return res.status(400).json({
-                error: 'Photo could not be uploaded'
-            });
-        }
-        // save user
-        let user = req.profile;
-        // console.log("user in update: ", user);
-        user = _.extend(user, fields);
+     let user = req.profile;
+     user = _.extend(user, req.body); // extend - mutate the source object
+     user.updated = Date.now();
+     user.save(err => {
+         if (err) {
+             return res.status(400).json({
+                 error: "You are not authorized to perform this action"
+             });
+         }
+         user.hashed_password = undefined;
+         user.salt = undefined;
+         res.json({ user });
+     });
+};
 
-        user.updated = Date.now();
+//exports.updateUser = (req, res, next) => {
+//    let form = new formidable.IncomingForm();
+//    // console.log("incoming form data: ", form);
+//    form.keepExtensions = true;
+//    form.parse(req, (err, fields, files) => {
+//       if (err) {
+//            return res.status(400).json({
+//                error: 'Photo could not be uploaded'
+//            });
+//        }
+//        // save user
+//        let user = req.profile;
+//        // console.log("user in update: ", user);
+//        user = _.extend(user, fields);
+//
+//        user.updated = Date.now();
         // console.log("USER FORM DATA UPDATE: ", user);
 
-        if (files.photo) {
-            user.photo.data = fs.readFileSync(files.photo.path);
-            user.photo.contentType = files.photo.type;
-        }
+//        if (files.photo) {
+//            user.photo.data = fs.readFileSync(files.photo.path);
+//            user.photo.contentType = files.photo.type;
+//        }
 
-        user.save((err, result) => {
-            if (err) {
-                return res.status(400).json({
-                    error: err
-                });
-            }
-            user.hashed_password = undefined;
-            user.salt = undefined;
-            // console.log("user after update with formdata: ", user);
-            res.json(user);
-        });
-    });
-};
+//        user.save((err, result) => {
+//            if (err) {
+//                return res.status(400).json({
+//                    error: err
+//                });
+//            }
+//            user.hashed_password = undefined;
+//            user.salt = undefined;
+//            // console.log("user after update with formdata: ", user);
+//            res.json(user);
+//        });
+//    });
+//};
 
 exports.userPhoto = (req, res, next) => {
     if (req.profile.photo.data) {

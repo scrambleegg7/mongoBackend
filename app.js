@@ -10,6 +10,10 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 var cookieParser = require('cookie-parser');
 
+const cors = require('cors');
+const helmet = require('helmet');
+const fs = require("fs")
+
 // environment from .env
 dotenv.config();
 const port = process.env.PORT || 8080;
@@ -42,7 +46,7 @@ const myOwnMiddleWare = (req, res, next) => {
     next();
 }
 
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
     fs.readFile('docs/apiDocs.json', (err, data) => {
         if (err) {
             res.status(400).json({
@@ -59,12 +63,21 @@ app.use( morgan("dev") );
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(expressValidator())
-app.use('/api', postRoutes);
-app.use('/api', authRoutes);
-app.use('/api', userRoutes);
+
+app.use(cors())  
+
+app.use('/', postRoutes);
+app.use('/', authRoutes);
+app.use(function (err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+      res.status(401).json({
+          error: "Unauthorized error (data retrieved)"
+      });
+    }
+  });
 
 
-//app.use("/", postRoutes);
+app.use('/', userRoutes);
 
 
 app.listen(port, ()  => {
