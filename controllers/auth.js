@@ -13,6 +13,9 @@ exports.signup = async (req, res) => {
             error: 'Email is taken!'
         });
     const user = await new User(req.body);
+
+    console.log("body signup", req.body)
+
     await user.save();
     res.status(200).json({ message: 'Signup success! Please login.' });
 };

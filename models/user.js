@@ -1,17 +1,30 @@
 const mongoose = require("mongoose");
-const uuidv1 = require("uuid/v1");
+
+
+// new approach , uuid v1 is deprecated.
+const { v4: uuidv4 } = require('uuid');
 const crypto = require("crypto");
 const { ObjectId } = mongoose.Schema;
 const Post = require("./post");
 
 const userSchema = new mongoose.Schema({
-    
-    name: {
+
+    firstname: {
+        type: String,
+        trim: true,
+        required: true
+    },
+    lastname: {
         type: String,
         trim: true,
         required: true
     },
     email: {
+        type: String,
+        trim: true,
+        required: true
+    },
+    backgroundColor: {
         type: String,
         trim: true,
         required: true
@@ -42,7 +55,9 @@ userSchema
         // create temporary variable called _password
         this._password = password;
         // generate a timestamp
-        this.salt = uuidv1();
+        //this.salt = uuidv1();
+        this.salt = uuidv4();
+        
         // encryptPassword()
         this.hashed_password = this.encryptPassword(password);
     })

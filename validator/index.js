@@ -26,11 +26,15 @@ exports.createPostValidator = (req, res, next) => {
 
 exports.userSignupValidator = (req, res, next) => {
     // name is not null and between 4-10 characters
-    req.check('name', 'Name is required').notEmpty();
+    
+    req.check('firstname', 'First Name is required').notEmpty();
+    req.check('lastname', 'Last Name is required').notEmpty();
+    req.check('backgroundColor', 'BackGrundColor is required').notEmpty();
+    
     // email is not null, valid and normalized
     req.check('email', 'Email must be between 3 to 32 characters')
         .matches(/.+\@.+\..+/)
-        .withMessage('Email must contain @')
+        .withMessage('Email must contain !!')
         .isLength({
             min: 4,
             max: 2000
