@@ -75,6 +75,8 @@ exports.userSigninValidator = (request, response, next) => {
         .withMessage('Your social login token is invalid!');
     const errors = request.validationErrors();
     if (errors) {
+
+        console.log("userSignInValidator", error)
         const firstError = errors.map(error => error.msg)[0];
         return res.status(400).json({ error: firstError });
     }
