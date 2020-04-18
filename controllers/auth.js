@@ -113,24 +113,28 @@ exports.forgotPassword = (req, res) => {
 // then we got the right user
 
 exports.resetPassword = (req, res) => {
-    const { resetPasswordLink, newPassword } = req.body;
+    const { email, newPassword } = req.body;
+    //console.log("resetPassword body -> ",email, newPassword)
+    //User.findOne({ resetPasswordLink }, (err, user) => {
 
-    User.findOne({ resetPasswordLink }, (err, user) => {
+    User.findOne({ email }, (err, user) => {
         // if err or no user
+
         if (err || !user)
             return res.status('401').json({
-                error: 'Invalid Link!'
+                error: 'Invalid Link!' + ":" + err
             });
 
+        console.log("** resetPassword findOne with resetPasswordLink -> ", user)
         const updatedFields = {
             password: newPassword,
-            resetPasswordLink: ''
+            //resetPasswordLink: ''
         };
 
         user = _.extend(user, updatedFields);
         user.updated = Date.now();
 
-        user.save((err, result) => {
+        user.save((err) => {
             if (err) {
                 return res.status(400).json({
                     error: err
