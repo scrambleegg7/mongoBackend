@@ -56,6 +56,9 @@ exports.createPost = (req, res, next) => {
         req.profile.hashed_password = undefined;
         req.profile.salt = undefined;
         post.postedBy = req.profile
+
+        console.log("createPost (post_json / controllers)", req.profile)
+
         if (files.photo) {
             post.photo.data = fs.readFileSync(files.photo.path)
             post.photo.contentType = files.photo.type
