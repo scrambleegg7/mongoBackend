@@ -27,9 +27,9 @@ exports.postById = (req, res, next, id) => {
 exports.getPosts = (req, res)  => {
 
     const posts = Post.find()
-    .populate("postedBy", "_id name")
+    .populate("postedBy", "_id firstname lastname email backgroundColor created")
     .select(
-        "_id title body"
+        "_id title body created"
     )
     .then( (posts) => {
         res.status(200).json(
@@ -57,7 +57,8 @@ exports.createPost = (req, res, next) => {
         req.profile.salt = undefined;
         post.postedBy = req.profile
 
-        console.log("createPost (post_json / controllers)", req.profile)
+        console.log("createPost (post_json / controllers / user profile)", req.profile)
+        console.log("createPost (post_json / controllers / post )", post)
 
         if (files.photo) {
             post.photo.data = fs.readFileSync(files.photo.path)
