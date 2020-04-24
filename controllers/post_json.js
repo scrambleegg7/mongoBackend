@@ -122,9 +122,7 @@ exports.deletePost = (req, res) => {
                 error: err
             })
         }
-        res.json({
-            message: "successfully removed"
-        })
+        res.json(post)
     });
 };
 
