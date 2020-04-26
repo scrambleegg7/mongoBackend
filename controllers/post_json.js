@@ -100,9 +100,9 @@ exports.isPoster = (req, res, next) => {
 
     let isPoster = req.post && req.auth && req.post.postedBy._id == req.auth._id;
 
-    console.log("req.auth", req.auth._id)
-    console.log("req.post.postedBy._id", req.post.postedBy._id)
-    console.log("Posted content", req.post)
+    console.log("req.auth (isPoster/post_json/controllers) : ", req.auth._id)
+    console.log("req.post.postedBy._id (isPoster/post_json/controllers) : ", req.post.postedBy._id)
+    console.log("Posted content (isPoster/post_json/controllers) : ", req.post)
 
     if (!isPoster) {
         return res.status(403).json({
@@ -128,18 +128,81 @@ exports.deletePost = (req, res) => {
 
 exports.updatePost = (req, res, next) => {
 
-    let post = req.post;
-    post = _.extend(post, req.body);
-    post.updated = Date.now();
-    post.save( (err) => {
-
+    // save post
+    let form = new formidable.IncomingForm();
+    form.keepExtensions = true;
+    form.parse(req, (err, fields, files) => {
         if (err) {
             return res.status(400).json({
-                error: "Post updated is failed. You are not authorized to perform."
-            })
+                error: 'Photo could not be uploaded'
+            });
         }
-        res.json(post)
 
-    })
+        console.log("updatePost : request post --> ", req.post)
+        // save post
+        let post = req.post;
+        post = _.extend(post, fields);
+        post.updated = Date.now();
+
+        if (files.photo) {
+            post.photo.data = fs.readFileSync(files.photo.path);
+            post.photo.contentType = files.photo.type;
+        }
+
+        post.save((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: err
+                });
+            }
+            res.json(post);
+        });
+    });
+
     
 };
+
+exports.findByIdAndUpdatePost = (req, res, next) => {
+
+    // save post
+    let form = new formidable.IncomingForm();
+    form.keepExtensions = true;
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            return res.status(400).json({
+                error: 'Photo could not be uploaded'
+            });
+        }
+
+        console.log("findByIdAndUpdatePost : request post --> ", req.post)
+        // save post
+        let post = req.post;
+        post = _.extend(post, fields);
+        post.updated = Date.now();
+
+        if (files.photo) {
+            post.photo.data = fs.readFileSync(files.photo.path);
+            post.photo.contentType = files.photo.type;
+        }
+
+        post.save((err, result) => {
+
+            Post.findById( post._id)
+            .populate("postedBy", "_id firstname lastname email backgroundColor created")
+            .select(
+                "_id title body created"
+            )
+            .exec( (err, result) => {
+                if ( err  || !post ) {
+                    return res.status(400).json(
+                        {error: err}
+                    )
+                }
+                res.json(result);
+            });
+        });
+
+    
+    });
+
+}
