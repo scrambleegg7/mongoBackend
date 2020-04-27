@@ -3,6 +3,7 @@
     "/signup": "sign up",
     "/signin": "sign in",
     "/signout": "signout",
+    "/users": "users",
     "/user/:userId": "create/delete/update user id",
     "/post/new/:userId": "post new message",
     "/posts/by/:userId": "post by user",

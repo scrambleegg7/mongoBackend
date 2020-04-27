@@ -28,8 +28,10 @@ exports.getPosts = (req, res)  => {
 
     const posts = Post.find()
     .populate("postedBy", "_id firstname lastname email backgroundColor created")
+    .populate("comments", "text created")
+    .populate("comments.postedBy", "_id firstname lastname email")
     .select(
-        "_id title body created"
+        "_id title body created updated confirmed"
     )
     .then( (posts) => {
         res.status(200).json(
@@ -190,7 +192,7 @@ exports.findByIdAndUpdatePost = (req, res, next) => {
             Post.findById( post._id)
             .populate("postedBy", "_id firstname lastname email backgroundColor created")
             .select(
-                "_id title body created"
+                "_id title body created updated confirmed"
             )
             .exec( (err, result) => {
                 if ( err  || !post ) {
@@ -204,5 +206,57 @@ exports.findByIdAndUpdatePost = (req, res, next) => {
 
     
     });
+
+}
+
+exports.comment = (req, res) => {
+
+    let comment = req.body.comment
+    comment.postById = req.body.userId  
+
+    console.log("comment", comment)
+
+    Post.findByIdAndUpdate(
+        req.body.postId ,
+        { $push: { comments: comment } },
+        { new : true}
+    )
+    .populate("comments.postedBy", "_id firstname lastname email")
+    .populate("postedBy", "_id firstname lastname email")
+    .exec((err,result) => {
+        if (err) {
+            return res.status(400).json(
+                {error: err}
+            );
+        }
+        else {
+            res.json(result)
+        }
+    });
+}
+
+
+exports.uncomment = (req, res) => {
+
+    let comment = req.body.comment
+
+    Post.findByIdAndUpdate(
+        req.body.postById,
+        { $push: { comments: { _id: comment._id } } },
+        { new : true}
+    )
+    .populate("comments.postedBy", "_id firstname lastname email")
+    .populate("postedBy", "_id firstname lastname email")
+    .exec((err,result) => {
+        if (err) {
+            return res.status(400).json(
+                {error: err}
+            );
+        }
+        else {
+            res.json(result)
+        }
+    });
+
 
 }
