@@ -1,7 +1,9 @@
 const express = require('express')
 const { getPosts, createPost, postsByUser, postById, isPoster, deletePost, updatePost, 
         findByIdAndUpdatePost, 
-        comment, uncomment
+        comment, uncomment, 
+        commentTest, 
+        findTest
         } = require('../controllers/post_json')
 const {createPostValidator} = require("../validator")
 
@@ -10,6 +12,8 @@ const { userById } = require('../controllers/user');
 
 
 const router = express.Router()
+
+
 
 router.get('/posts', requireSignin,  getPosts);
 router.post('/post/new/:userId',  
@@ -20,14 +24,20 @@ router.get('/posts/by/:userId',
                 requireSignin,
                 postsByUser,);
 
+router.put("/post/comment/update", requireSignin, comment);
+                
+
 router.delete("/post/:postId", requireSignin,  isPoster, deletePost);
 router.put("/post/:postId", requireSignin,  isPoster, updatePost);
 router.put("/post/update/:postId", requireSignin,  isPoster, findByIdAndUpdatePost);
 
 // comments
-router.put('/post/comment', requireSignin, comment);
-router.put('/post/uncomment', requireSignin, uncomment);
+//router.put('/post/comment', requireSignin, comment);
+
+
 //router.put('/post/updatecomment', requireSignin, updateComment);
+
+//router.put('/post/comment/:postId', requireSignin, comment);
 
 router.param("userId", userById);
 

@@ -8,7 +8,7 @@ const _ = require('lodash');
 exports.postById = (req, res, next, id) => {
 
     Post.findById(id)
-    .populate("postedBy", "_id name")
+    .populate("postedBy", "_id firstname lastname email created")
     .exec( (err, post) => {
         if ( err  || !post ) {
             return res.status(400).json(
@@ -26,13 +26,17 @@ exports.postById = (req, res, next, id) => {
 
 exports.getPosts = (req, res)  => {
 
+    console.log("getPosts...")
+
     const posts = Post.find()
-    .populate("postedBy", "_id firstname lastname email backgroundColor created")
     .populate("comments", "text created")
     .populate("comments.postedBy", "_id firstname lastname email")
+    .populate("postedBy", "_id firstname lastname email backgroundColor created")
+    
     .select(
         "_id title body created updated confirmed"
     )
+    .sort({ created: -1 })
     .then( (posts) => {
         res.status(200).json(
             {posts: posts}
@@ -209,10 +213,21 @@ exports.findByIdAndUpdatePost = (req, res, next) => {
 
 }
 
+
+exports.findTest = (req, res, next) => {
+
+    res.json(
+        {"test": "comment."}
+    )
+
+
+}
+
+
 exports.comment = (req, res) => {
 
     let comment = req.body.comment
-    comment.postById = req.body.userId  
+    comment.postedBy = req.body.userId;
 
     console.log("comment", comment)
 
@@ -236,13 +251,26 @@ exports.comment = (req, res) => {
 }
 
 
+
+exports.commentTest = (req, res, next) => {
+
+    console.log("commentTest", req.body)
+    
+    res.json(
+        {"test": "testmessage"}
+    )
+
+    
+}
+
+
 exports.uncomment = (req, res) => {
 
     let comment = req.body.comment
 
     Post.findByIdAndUpdate(
         req.body.postById,
-        { $push: { comments: { _id: comment._id } } },
+        { $push: { comments: comment  } },
         { new : true}
     )
     .populate("comments.postedBy", "_id firstname lastname email")
