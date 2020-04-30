@@ -24,6 +24,8 @@ router.get('/posts/by/:userId',
                 requireSignin,
                 postsByUser,);
 
+router.get('/post/comment/get', requireSignin,  findTest);
+
 router.put("/post/comment/update", requireSignin, comment);
                 
 

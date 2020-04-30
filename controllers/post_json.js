@@ -29,14 +29,18 @@ exports.getPosts = (req, res)  => {
     console.log("getPosts...")
 
     const posts = Post.find()
-    .populate("comments", "text created")
+//    .populate("comments", "text created")
     .populate("comments.postedBy", "_id firstname lastname email")
     .populate("postedBy", "_id firstname lastname email backgroundColor created")
     
-    .select(
-        "_id title body created updated confirmed"
-    )
     .sort({ created: -1 })
+    
+    .select(
+        "_id title body created updated confirmed comments"
+    )
+
+
+
     .then( (posts) => {
         res.status(200).json(
             {posts: posts}
@@ -216,9 +220,26 @@ exports.findByIdAndUpdatePost = (req, res, next) => {
 
 exports.findTest = (req, res, next) => {
 
-    res.json(
-        {"test": "comment."}
+    const posts = Post.find()
+
+    .populate("comments.postedBy", "_id firstname lastname email")
+    .populate("postedBy", "_id firstname lastname email")
+    .sort({ created: -1 })
+    
+    .select(
+        "_id title body created updated confirmed comments"
     )
+
+    .exec((err,result) => {
+        if (err) {
+            return res.status(400).json(
+                {error: err}
+            );
+        }
+        else {
+            res.json(result)
+        }
+    });
 
 
 }
