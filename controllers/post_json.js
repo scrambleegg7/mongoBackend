@@ -30,7 +30,7 @@ exports.getPosts = (req, res)  => {
 
     const posts = Post.find()
 //    .populate("comments", "text created")
-    .populate("comments.postedBy", "_id firstname lastname email")
+    .populate("comments.postedBy", "_id firstname lastname email backgroundColor")
     .populate("postedBy", "_id firstname lastname email backgroundColor created")
     
     .sort({ created: -1 })
@@ -257,8 +257,10 @@ exports.comment = (req, res) => {
         { $push: { comments: comment } },
         { new : true}
     )
-    .populate("comments.postedBy", "_id firstname lastname email")
-    .populate("postedBy", "_id firstname lastname email")
+
+    .populate("comments.postedBy", "_id firstname lastname email backgroundColor")
+    .populate("postedBy", "_id firstname lastname email backgroundColor created")
+
     .exec((err,result) => {
         if (err) {
             return res.status(400).json(
