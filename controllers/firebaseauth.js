@@ -40,15 +40,15 @@ exports.signin = (req, res) => {
         //    });
        //}
         // generate a token with user id and secret
-        const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
+        //const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
         // persist the token as 't' in cookie with expiry date
-        res.cookie('t', token, { expire: new Date() + 9999 });
+        res.cookie('t', firebaseToken, { expire: new Date() + 9999 });
         // retrun response with user and token to frontend client
         const { _id, name, email, role } = user;
         
         console.log("controller auth returned data:", user )
 
-        return res.json({ token, user: { _id, email, name, role } });
+        return res.json({ firebaseToken, user: { _id, email, name, role } });
 
         //return res.json({ token, user: { _id, email, name, role } });
     });
@@ -59,13 +59,13 @@ exports.signout = (req, res) => {
     return res.json({ message: 'Signout success!' });
 };
 
-exports.requireSignin = expressJwt({
+exports.requireSignin = (req, res) => {
 
     // if token is validated, expressjwt appends into verfied user 
-    secret: process.env.JWT_SECRET,
-    userProperty: 'auth'
-    //next()
-});
+    //secret: process.env.JWT_SECRET,
+    //userProperty: 'auth'
+    next()
+};
 
 exports.forgotPassword = (req, res) => {
     if (!req.body) return res.status(400).json({ message: 'No request body' });
