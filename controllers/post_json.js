@@ -106,8 +106,16 @@ exports.postsByUser = (req, res) => {
 
 };
 
+
+exports.mytest = (req, res, next) => {
+
+    console.log("*** mytest.......")
+    next();
+}
+
 exports.isPoster = (req, res, next) => {
 
+    console.log("*** isPoster begins......", req.post.postedBy._id)
     let isPoster = req.post && req.auth && req.post.postedBy._id == req.auth._id;
 
     console.log("req.auth (isPoster/post_json/controllers) : ", req.auth._id)
@@ -128,6 +136,7 @@ exports.deletePost = (req, res) => {
     post.remove( (err, post) => {
 
         if (err) {
+            console.log("** deletePost Error -->" , err)
             return res.status(400).json({
                 error: err
             })

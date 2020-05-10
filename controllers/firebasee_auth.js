@@ -6,17 +6,95 @@ const _ = require('lodash');
 const { OAuth2Client } = require('google-auth-library');
 const { sendEmail } = require('../helpers');
 
-const { admin } = require('../config/fbConfig');
+
+//  firebases settings
+const { admin } = require('../config/fbConfig')
+
+const actionCodeSettings = {
+    // URL you want to redirect back to. The domain (www.example.com) for
+    // this URL must be whitelisted in the Firebase Console.
+    url: 'http://localhost:3030',
+    // This must be true for email link sign-in.
+    handleCodeInApp: true,
+    //iOS: {
+    //  bundleId: 'com.example.ios'
+    //},
+    //android: {
+    //  packageName: 'com.example.android',
+    //  installApp: true,
+    //  minimumVersion: '12'
+    //},
+    // FDL custom domain.
+    //dynamicLinkDomain: 'coolapp.page.link'
+};
+
+const getAuthToken = (req, res, next) => {
+    if (req.headers.authorization && 
+        req.headers.authorization.split(' ')[0] === "Bearer"
+        ) 
+    {
+        req.authToken = req.headers.authorization.split(' ')[1]
+        console.log("*** getAuthToken req.userId from signIn screen --> ", req.authToken)
+
+        console.log()
+    }
+    else {
+        req.authToken = null
+    }
+    next();
+}
+
 
 exports.signup = async (req, res) => {
     const userExists = await User.findOne({ email: req.body.email });
     if (userExists)
         return res.status(403).json({
-            error: 'Email is taken!'
+            error: 'お使いのEmailは登録されています!'
         });
     const user = await new User(req.body);
 
-    console.log("body signup", req.body)
+    console.log("signup req.body data --> ", req.body)
+
+    admin.auth().createUser({
+        email : req.body.email,
+        password : req.body.password,
+        //emailVerified: true,
+        displayName: `${req.body.firstName} ${req.body.lastName}`,
+    })
+    .then(
+        (userRecord) => {
+            console.log('Successfully created new user (firebase authentication):', userRecord.uid);
+            const useremail = req.body.email;
+                
+            admin.auth().generateEmailVerificationLink(useremail, actionCodeSettings)
+            .then((link) => {
+              // Construct email verification template, embed the link and send
+              // using custom SMTP server.
+              //return sendCustomVerificationEmail(useremail, displayName, link);
+              const emailData = {
+                from: 'noreply@node-react.com',
+                to: useremail,
+                subject: 'Emailアドレスを有効化します。',
+                text: `お使いのEmailを有効化するため下記リンクをクリックしてください。(text): ${link}`,
+                html: `<p>お使いのEmailを有効化するため下記リンクをクリックしてください:</p><br/> <p>${link}</p>`
+                };
+                sendEmail(emailData);
+
+                console.log("** admin.auth().generateEmailVerificationLink --> ",link)
+            })
+            .catch((error) => {
+                console.log("** generateEmailVerification error --> ",error)
+              // Some error occurred.
+            });
+          
+        }
+    )
+    .catch((err) => {
+        console.log('Error creating new user:', err);
+        return res.status(403).json({
+            error: 'firebase admin createuser error!'
+        });
+    });
 
     await user.save();
     res.status(200).json({ message: 'Signup success! Please login.' });
@@ -24,7 +102,7 @@ exports.signup = async (req, res) => {
 
 exports.signin = (req, res) => {
     // find the user based on email
-    const { email, password, firebaseToken } = req.body;
+    const { email, password, idToken, uid } = req.body;
     User.findOne({ email }, (err, user) => {
         // if err or no user
         if (err || !user) {
@@ -32,27 +110,55 @@ exports.signin = (req, res) => {
                 error: 'User with that email does not exist. Please signup.'
             });
         }
-        
-        // suppress user.authenticate function 
+
+
+        //console.log("** signIn received Token", idToken)
+        //admin.auth().createCustomToken(uid)
+        //admin.auth().verifyIdToken(idToken)
+        //.then( (decodedToken) => {
+        //    console.log("** decodedToken from  --> ",decodedToken)
+        //})
+        //.catch( (error) => {
+        //    console.log("verifyIdToken = decodedToken Error --> ", error)
+        //    return res.status(403).json({
+        //        err: error
+        //    });    
+        //})        
         // if user is found make sure the email and password match
         // create authenticate method in model and use here
         //if (!user.authenticate(password)) {
         //    return res.status(401).json({
         //        error: 'Email and password do not match'
         //    });
-       //}
+        //}
         // generate a token with user id and secret
-        //const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
-        // persist the token as 't' in cookie with expiry date
-        res.cookie('t', firebaseToken, { expire: new Date() + 9999 });
+// persist the token as 't' in cookie with expiry date
         // retrun response with user and token to frontend client
-        const { _id, name, email, role } = user;
         
-        console.log("controller auth returned data:", user )
+        //admin.auth().createCustomToken("" + _id)        
+        //.then( (customToken) => {
+        //    console.log("** customToken based in user._id --> ",customToken)
+        
+        //    console.log("controller auth returned data:", user )    
+            // 
+            //req.user_model = user
+        //})
+        //.catch( (error) => {
+        //    console.log("customToken Error --> ", error)
+        //    return res.status(403).json({
+        //        err: error
+        //    });    
+        //})
+        
+        //const idToken = customToken;
+        const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET);
+        const { _id, name, email, role } = user;
+        res.cookie('t', token, { expire: new Date() + 9999 });
 
-        return res.json({ firebaseToken, user: { _id, email, name, role } });
+        return res.json({   token: token, 
+                            user: { _id, email, name, role } 
+        });
 
-        //return res.json({ token, user: { _id, email, name, role } });
     });
 };
 
@@ -61,13 +167,43 @@ exports.signout = (req, res) => {
     return res.json({ message: 'Signout success!' });
 };
 
-exports.requireSignin = (req, res) => {
+exports.checkIfAuthenticated = (req, res, next) => {
+
+    getAuthToken(req, res, async () => {
+        try {
+            const { authToken, user_model } = req;
+            const decodedToken = await admin.auth().verifyIdToken(authToken);
+
+
+            console.log("*** checkAuthentication decodedToken", decodedToken)
+            if (decodedToken.uid) {
+                req.auth = user_model
+                //console.log("** req.auth --> ", )
+                return next()
+            }
+
+            return new Error("** Unauthorized from checkIfAuthenticated.")
+        } 
+        catch (e) {
+            return res.status(401).json({
+                error: '** Unauthorized checkIfAuthenticated!'
+            })
+        }
+    })
+
+    //return next();
+    //return res.send({error : "error "})
+}
+
+
+exports.requireSignin = expressJwt({
 
     // if token is validated, expressjwt appends into verfied user 
-    //secret: process.env.JWT_SECRET,
-    //userProperty: 'auth'
-    next()
-};
+    secret: process.env.JWT_SECRET,
+    userProperty: 'auth'
+});
+
+
 
 exports.forgotPassword = (req, res) => {
     if (!req.body) return res.status(400).json({ message: 'No request body' });

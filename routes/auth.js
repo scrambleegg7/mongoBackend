@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, signin, signout, forgotPassword, resetPassword, socialLogin } = require('../controllers/auth');
+const { signup, signin, signout, forgotPassword, resetPassword, socialLogin } = require('../controllers/firebasee_auth');
 
 // import password reset validator
 const { userSignupValidator, userSigninValidator, passwordResetValidator } = require('../validator');

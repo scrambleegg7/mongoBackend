@@ -2,12 +2,13 @@ const express = require('express')
 const { getPosts, createPost, postsByUser, postById, isPoster, deletePost, updatePost, 
         findByIdAndUpdatePost, 
         comment, uncomment, 
-        commentTest, 
+        commentTest, mytest, 
         findTest
         } = require('../controllers/post_json')
 const {createPostValidator} = require("../validator")
 
-const { requireSignin } = require('../controllers/auth');
+
+const { requireSignin, checkIfAuthenticated } = require('../controllers/firebasee_auth');
 const { userById } = require('../controllers/user');
 
 
@@ -16,6 +17,8 @@ const router = express.Router()
 
 
 router.get('/posts', requireSignin,  getPosts);
+//router.get('/posts', checkIfAuthenticated,  getPosts);
+
 router.post('/post/new/:userId',  
                 requireSignin,
                 createPost,
@@ -29,9 +32,12 @@ router.get('/post/comment/get', requireSignin,  findTest);
 router.put("/post/comment/update", requireSignin, comment);
                 
 
+//router.delete("/post/:postId", checkIfAuthenticated, mytest,  isPoster, deletePost);
 router.delete("/post/:postId", requireSignin,  isPoster, deletePost);
+
 router.put("/post/:postId", requireSignin,  isPoster, updatePost);
 router.put("/post/update/:postId", requireSignin,  isPoster, findByIdAndUpdatePost);
+
 
 // comments
 //router.put('/post/comment', requireSignin, comment);
