@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 
+const path = require('path');
 const expressValidator = require('express-validator')
 const bodyParser = require("body-parser");
 
@@ -16,11 +17,13 @@ const fs = require("fs")
 
 // environment from .env
 dotenv.config();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 5000;
 
 console.log("MongoURI to be connected....",process.env.MONGO_URI)
 console.log("")
 
+// React App default directory
+app.use(express.static(path.join(__dirname, 'client/build')));
 // mongo DB
 mongoose.connect(
         process.env.MONGO_URI, 
