@@ -23,7 +23,7 @@ console.log("MongoURI to be connected....",process.env.MONGO_URI)
 console.log("")
 
 // React App default directory
-app.use(express.static(path.join(__dirname, 'client/build')));
+//app.use(express.static(path.join(__dirname, 'client/build')));
 // mongo DB
 mongoose.connect(
         process.env.MONGO_URI, 
@@ -50,7 +50,7 @@ const myOwnMiddleWare = (req, res, next) => {
     next();
 }
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     fs.readFile('docs/apiDocs.json', (err, data) => {
         if (err) {
             res.status(400).json({
@@ -70,8 +70,8 @@ app.use(expressValidator())
 
 app.use(cors())  
 
-app.use('/', postRoutes);
-app.use('/', authRoutes);
+app.use('/api', postRoutes);
+app.use('/api', authRoutes);
 app.use(function (err, req, res, next) {
     if (err.name === 'UnauthorizedError') {
       res.status(401).json({
@@ -81,7 +81,7 @@ app.use(function (err, req, res, next) {
   });
 
 
-app.use('/', userRoutes);
+app.use('/api', userRoutes);
 
 
 app.listen(port, ()  => {
