@@ -30,7 +30,8 @@ router.get('/posts/by/:userId',
 router.get('/post/comment/get', requireSignin,  findTest);
 
 router.put("/post/comment/update", requireSignin, comment);
-                
+
+router.put('/post/comment/uncomment', requireSignin, uncomment);
 
 //router.delete("/post/:postId", checkIfAuthenticated, mytest,  isPoster, deletePost);
 router.delete("/post/:postId", requireSignin,  isPoster, deletePost);

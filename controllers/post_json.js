@@ -283,32 +283,27 @@ exports.comment = (req, res) => {
 }
 
 
-
-exports.commentTest = (req, res, next) => {
-
-    console.log("commentTest", req.body)
-    
-    res.json(
-        {"test": "testmessage"}
-    )
-
-    
-}
-
-
 exports.uncomment = (req, res) => {
 
     let comment = req.body.comment
+    //comment.postedBy = req.body.userId;
+
+    console.log("comment to be deleted.", comment)
 
     Post.findByIdAndUpdate(
-        req.body.postById,
-        { $push: { comments: comment  } },
-        { new : true}
+        req.body.postId ,
+        
+        { $pull: { comments: { _id: comment._id } } }, 
+        { new: true }
+
     )
-    .populate("comments.postedBy", "_id firstname lastname email")
-    .populate("postedBy", "_id firstname lastname email")
+
+    .populate("comments.postedBy", "_id firstname lastname email backgroundColor")
+    .populate("postedBy", "_id firstname lastname email backgroundColor created")
+
     .exec((err,result) => {
         if (err) {
+            console.log("Error on delete Comment..", err)
             return res.status(400).json(
                 {error: err}
             );
@@ -317,6 +312,8 @@ exports.uncomment = (req, res) => {
             res.json(result)
         }
     });
+
+
 
 
 }
