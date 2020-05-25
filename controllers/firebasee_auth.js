@@ -55,47 +55,6 @@ exports.signup = async (req, res) => {
 
     console.log("signup req.body data --> ", req.body)
 
-    admin.auth().createUser({
-        email : req.body.email,
-        password : req.body.password,
-        //emailVerified: true,
-        displayName: `${req.body.firstName} ${req.body.lastName}`,
-    })
-    .then(
-        (userRecord) => {
-            console.log('Successfully created new user (firebase authentication):', userRecord.uid);
-            const useremail = req.body.email;
-                
-            admin.auth().generateEmailVerificationLink(useremail, actionCodeSettings)
-            .then((link) => {
-              // Construct email verification template, embed the link and send
-              // using custom SMTP server.
-              //return sendCustomVerificationEmail(useremail, displayName, link);
-              const emailData = {
-                from: 'noreply@node-react.com',
-                to: useremail,
-                subject: 'Emailアドレスを有効化します。',
-                text: `お使いのEmailを有効化するため下記リンクをクリックしてください。(text): ${link}`,
-                html: `<p>お使いのEmailを有効化するため下記リンクをクリックしてください:</p><br/> <p>${link}</p>`
-                };
-                sendEmail(emailData);
-
-                console.log("** admin.auth().generateEmailVerificationLink --> ",link)
-            })
-            .catch((error) => {
-                console.log("** generateEmailVerification error --> ",error)
-              // Some error occurred.
-            });
-          
-        }
-    )
-    .catch((err) => {
-        console.log('Error creating new user:', err);
-        return res.status(403).json({
-            error: 'firebase admin createuser error!'
-        });
-    });
-
     await user.save();
     res.status(200).json({ message: 'Signup success! Please login.' });
 };

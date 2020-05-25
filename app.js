@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+const https = require( 'https' );
+
 const path = require('path');
 const expressValidator = require('express-validator')
 const bodyParser = require("body-parser");
@@ -50,17 +52,17 @@ const myOwnMiddleWare = (req, res, next) => {
     next();
 }
 
-app.get('/api', (req, res) => {
-    fs.readFile('docs/apiDocs.json', (err, data) => {
-        if (err) {
-            res.status(400).json({
-                error: err
-            });
-        }
-        const docs = JSON.parse(data);
-        res.json(docs);
-    });
-});
+//app.get('/api', (req, res) => {
+//    fs.readFile('docs/apiDocs.json', (err, data) => {
+//        if (err) {
+//            res.status(400).json({
+//                error: err
+//            });
+//        }
+//        const docs = JSON.parse(data);
+//        res.json(docs);
+//    });
+//});
 
 
 app.use( morgan("dev") );
@@ -82,6 +84,18 @@ app.use(function (err, req, res, next) {
 
 
 app.use('/api', userRoutes);
+
+// we will pass our 'app' to 'https' server
+//https.createServer( options, (socket) => {
+//    console.log('server connected')
+    //socket.authorized ? 'authorized' : 'unauthorized', socket.getProtocol());
+    //socket.write('welcome!\n');
+    //socket.setEncoding('utf8');
+    //socket.pipe(socket);  
+//}, app)
+//.listen(port, () => {
+//    console.log(`A node js api is listening on port : ${port}`);
+//});
 
 
 app.listen(port, ()  => {
