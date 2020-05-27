@@ -207,9 +207,11 @@ exports.findByIdAndUpdatePost = (req, res, next) => {
         post.save((err, result) => {
 
             Post.findById( post._id)
+            .populate("comments.postedBy", "_id firstname lastname email backgroundColor")
             .populate("postedBy", "_id firstname lastname email backgroundColor created")
             .select(
-                "_id title body created updated confirmed"
+                "_id title body created updated confirmed comments"
+                //"_id title body created updated confirmed "
             )
             .exec( (err, result) => {
                 if ( err  || !post ) {
