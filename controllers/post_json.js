@@ -36,9 +36,8 @@ exports.getPosts = (req, res)  => {
     .sort({ created: -1 })
     
     .select(
-        "_id title body created updated confirmed comments"
+        "_id title body created updated confirmed comments photo"
     )
-
 
 
     .then( (posts) => {
@@ -69,6 +68,8 @@ exports.createPost = (req, res, next) => {
 
         console.log("createPost (post_json / controllers / user profile)", req.profile)
         console.log("createPost (post_json / controllers / post )", post)
+        console.log("createPost (post_json / controllers / post )", files)
+
 
         if (files.photo) {
             post.photo.data = fs.readFileSync(files.photo.path)

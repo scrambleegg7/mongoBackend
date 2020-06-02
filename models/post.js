@@ -17,7 +17,7 @@ const postScheme = new mongoose.Schema(
             //maxlength: 2000
         },
         photo: {
-            type: Buffer,
+            data: Buffer,
             contentType: String,
         },
         postedBy: {
