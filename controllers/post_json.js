@@ -8,7 +8,11 @@ const _ = require('lodash');
 exports.postById = (req, res, next, id) => {
 
     Post.findById(id)
-    .populate("postedBy", "_id firstname lastname email created")
+    .populate("comments.postedBy", "_id firstname lastname email backgroundColor")
+    .populate("postedBy", "_id firstname lastname email backgroundColor created")
+    .select(
+        "_id title body created updated confirmed comments photo"
+    )
     .exec( (err, post) => {
         if ( err  || !post ) {
             return res.status(400).json(
@@ -211,7 +215,7 @@ exports.findByIdAndUpdatePost = (req, res, next) => {
             .populate("comments.postedBy", "_id firstname lastname email backgroundColor")
             .populate("postedBy", "_id firstname lastname email backgroundColor created")
             .select(
-                "_id title body created updated confirmed comments"
+                "_id title body created updated confirmed comments photo"
                 //"_id title body created updated confirmed "
             )
             .exec( (err, result) => {
@@ -239,7 +243,7 @@ exports.findTest = (req, res, next) => {
     .sort({ created: -1 })
     
     .select(
-        "_id title body created updated confirmed comments"
+        "_id title body created updated confirmed comments photo"
     )
 
     .exec((err,result) => {
@@ -320,3 +324,8 @@ exports.uncomment = (req, res) => {
 
 
 }
+
+exports.photo = (req, res, next) => {
+    res.set('Content-Type', req.post.photo.contentType);
+    return res.send(req.post.photo.data);
+};

@@ -2,7 +2,7 @@ const express = require('express')
 const { getPosts, createPost, postsByUser, postById, isPoster, deletePost, updatePost, 
         findByIdAndUpdatePost, 
         comment, uncomment, 
-        commentTest, mytest, 
+        commentTest, photo, 
         findTest
         } = require('../controllers/post_json')
 const {createPostValidator} = require("../validator")
@@ -40,13 +40,10 @@ router.put("/post/:postId", requireSignin,  isPoster, updatePost);
 router.put("/post/update/:postId", requireSignin,  isPoster, findByIdAndUpdatePost);
 
 
-// comments
-//router.put('/post/comment', requireSignin, comment);
+// photo
+router.get('/post/photo/:postId', photo);
 
 
-//router.put('/post/updatecomment', requireSignin, updateComment);
-
-//router.put('/post/comment/:postId', requireSignin, comment);
 
 router.param("userId", userById);
 
